@@ -16,8 +16,7 @@ export function verifyJwt(req, res, next) {
 
         req.user = { id: decoded.id, name: decoded.name };
         next();
-    } catch (err) {
-        console.error("JWT verification error:", err);
-        return res.status(500).json({ error: 'Server error' });
+    } catch {
+        return res.status(401).json({ error: "Expired token" });
     }
 }

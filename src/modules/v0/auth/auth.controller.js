@@ -8,7 +8,7 @@ export class AuthController {
     async register(req, res) {
         if (!req.body) return res.status(400).json({ error: 'Request body is required' });
 
-        if (typeof req.body.name !== 'string' || typeof req.body.password !== 'string') return res.status(400).json({ error: 'Invalid name or password' });
+        if (typeof req.body.name !== 'string' || typeof req.body.password !== 'string') return res.status(400).json({ error: 'Missing or invalid name or password' });
 
         if (req.body.password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters long' });
 
@@ -27,7 +27,7 @@ export class AuthController {
     async login(req, res) {
         if (!req.body) return res.status(400).json({ error: 'Request body is required' });
 
-        if (typeof req.body.name !== 'string' || typeof req.body.password !== 'string') return res.status(400).json({ error: 'Invalid name or password' });
+        if (typeof req.body.name !== 'string' || typeof req.body.password !== 'string') return res.status(400).json({ error: 'Missing or invalid name or password' });
 
         const result = await service.login(req.body);
 
@@ -45,6 +45,18 @@ export class AuthController {
 
         return res.status(result.status).json({ user: result.user });
     }
+
+    async refresh(req, res) {
+        if (!req.body) return res.status(400).json({ error: 'Request body is required' });
+
+        if (typeof req.body.token !== "string" || typeof req.body.name !== "string") return res.status(400).json({ error: 'Missing or invalid token or name' });
+
+        const result = await service.refresh(req.body.name, req.body.token);
+
+        if (result.error) return res.status(result.status).json({ error: result.error });
+
+        return res.status(result.status).json({ accessToken: result.accessToken });
+    }
 }
 
 const authRouter = Router();
@@ -53,5 +65,6 @@ const controller = new AuthController();
 authRouter.post('/register', controller.register);
 authRouter.post('/login', controller.login);
 authRouter.get('/whoami', verifyJwt ,controller.whoami);
+authRouter.post('/refresh', controller.refresh);
 
 export default authRouter;
