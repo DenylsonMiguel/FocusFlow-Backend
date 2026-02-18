@@ -1,6 +1,6 @@
 import { AuthService } from './auth.service.js';
 import { Router } from 'express';
-import { verifyJwt } from '../middlewares/verifyJwt.js'
+import { verifyAccessToken, verifyRefreshToken } from '../middlewares/auth/verifyToken.js'
 
 const service = new AuthService();
 
@@ -47,11 +47,13 @@ export class AuthController {
     }
 
     async refresh(req, res) {
-        if (!req.body) return res.status(400).json({ error: 'Request body is required' });
+        if (!req.body) return res.status(400).json({ error: 'Request Body is required' });
 
-        if (typeof req.body.token !== "string" || typeof req.body.name !== "string") return res.status(400).json({ error: 'Missing or invalid token or name' });
+        if (typeof req.body.token !== "string") return res.status(400).json({ error: 'Missing or invalid token' });
 
-        const result = await service.refresh(req.body.name, req.body.token);
+        if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+        const result = await service.refresh(req.user.id, req.body.token);
 
         if (result.error) return res.status(result.status).json({ error: result.error });
 
@@ -64,7 +66,7 @@ const controller = new AuthController();
 
 authRouter.post('/register', controller.register);
 authRouter.post('/login', controller.login);
-authRouter.get('/whoami', verifyJwt ,controller.whoami);
-authRouter.post('/refresh', controller.refresh);
+authRouter.get('/whoami', verifyAccessToken ,controller.whoami);
+authRouter.post('/refresh', verifyRefreshToken, controller.refresh);
 
 export default authRouter;

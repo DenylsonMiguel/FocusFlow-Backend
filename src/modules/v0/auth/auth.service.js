@@ -43,7 +43,7 @@ export class AuthService {
 
         const accessToken = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-        const refreshToken = await jwt.sign({ id: user._id, name: user.name }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        const refreshToken = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
         await RefreshToken.create({
             userId: user._id,
@@ -73,15 +73,15 @@ export class AuthService {
      * @param {String} token 
      * @returns {Promise<{error: string, status: number} | {status: number, accessToken: string}>}
      */
-    async refresh(name, token) {
+    async refresh(id, token) {
         const refreshToken = await RefreshToken.findOne({ token });
         if (!refreshToken) return { error: "Invalid token", status: 401 };
         const tUser = await User.findById(refreshToken.userId);
         if (!tUser) return { error: "User Token not exists", status: 400 };
-        if (tUser.name !== name) return { error: "Forbbiden", status: 403 };
+        if (tUser._id.toString() !== id) return { error: "Forbbiden", status: 403 };
         if (refreshToken.state !== "active") return { error: "Expired Token", status: 400 };
 
-        const user = await User.findOne({ name });
+        const user = await User.findById(id);
         if (!user) return { error: "Invalid name", status: 401 };
 
         const accessToken = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '15m' });

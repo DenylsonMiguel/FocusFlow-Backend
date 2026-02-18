@@ -76,7 +76,7 @@ npm start
 | POST   | /api/v0/auth/register | Register new user    |
 | POST   | /api/v0/auth/login    | Login user           |
 | GET    | /api/v0/auth/whoami   | Get current user     |
-| GET    | /api/v0/auth/refresh  | Refresh access token |
+| POST   | /api/v0/auth/refresh  | Refresh access token |
 
 ---
 
@@ -147,8 +147,12 @@ Response:
 Request:
 
 ```
-GET /api/v0/auth/refresh
+POST /api/v0/auth/refresh
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
 ```
 
 Response:
