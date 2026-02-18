@@ -71,14 +71,16 @@ npm start
 
 ### Authentication
 
-| Method | Endpoint              | Description         |
-|--------|-----------------------|---------------------|
-| POST   | /api/v0/auth/register | Register new user   |
-
+| Method | Endpoint              | Description          |
+| ------ | --------------------- | -------------------- |
+| POST   | /api/v0/auth/register | Register new user    |
+| POST   | /api/v0/auth/login    | Login user           |
+| GET    | /api/v0/auth/whoami   | Get current user     |
+| POST   | /api/v0/auth/refresh  | Refresh access token |
 
 ---
 
-## Request Example
+## Examples
 
 ### Register User
 
@@ -98,6 +100,66 @@ Response:
 {
   "id": "abc123",
   "name": "John Doe"
+}
+```
+
+### Login User
+
+Request:
+
+```
+POST /api/v0/auth/login
+{
+  "name": "John Doe",
+  "password": "123456"
+}
+```
+
+Response:
+
+```
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Get Current User
+
+Request:
+
+```
+GET /api/v0/auth/whoami
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+Response:
+
+```
+{
+  "id": "abc123",
+  "name": "John Doe"
+}
+```
+
+### Refresh Access Token
+
+Request:
+
+```
+POST /api/v0/auth/refresh
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+Response:
+
+```
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 

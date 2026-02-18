@@ -39,11 +39,11 @@ export class AuthService {
 
         const isValid = await bcrypt.compare(data.password, user.password);
         
-        if (!isValid) return { error: 'Invalid name or password', status: 404 };
+        if (!isValid) return { error: 'Invalid name or password', status: 400 };
 
-        const accessToken = await jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '15m' });
+        const accessToken = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
-        const refreshToken = await jwt.sign({ id: user._id, name: user.name }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        const refreshToken = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
         await RefreshToken.create({
             userId: user._id,
@@ -65,5 +65,27 @@ export class AuthService {
         
         const pubUser = { id: user._id, name: user.name };
         return { status: 200, user: pubUser };
+    }
+
+    /**
+     * Refreshes access token using refresh token
+     * @param {String} name 
+     * @param {String} token 
+     * @returns {Promise<{error: string, status: number} | {status: number, accessToken: string}>}
+     */
+    async refresh(id, token) {
+        const refreshToken = await RefreshToken.findOne({ token });
+        if (!refreshToken) return { error: "Invalid token", status: 401 };
+        const tUser = await User.findById(refreshToken.userId);
+        if (!tUser) return { error: "User Token not exists", status: 400 };
+        if (tUser._id.toString() !== id) return { error: "Forbbiden", status: 403 };
+        if (refreshToken.state !== "active") return { error: "Expired Token", status: 400 };
+
+        const user = await User.findById(id);
+        if (!user) return { error: "Invalid name", status: 401 };
+
+        const accessToken = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+        return { status: 200, accessToken};
     }
 }
