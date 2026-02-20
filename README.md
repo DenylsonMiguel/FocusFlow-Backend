@@ -77,6 +77,7 @@ npm start
 | POST   | /api/v0/auth/login    | Login user           |
 | GET    | /api/v0/auth/whoami   | Get current user     |
 | POST   | /api/v0/auth/refresh  | Refresh access token |
+| POST   | /api/v0/auth/logout   | Logout user          |
 
 ---
 
@@ -160,6 +161,19 @@ Response:
 ```
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Logout User
+
+Request:
+
+```
+POST /api/v0/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 }
 ```
 
