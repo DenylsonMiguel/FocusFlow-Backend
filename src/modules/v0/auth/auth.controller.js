@@ -59,6 +59,20 @@ export class AuthController {
 
         return res.status(result.status).json({ accessToken: result.accessToken });
     }
+
+    async logout(req, res) {
+        if (!req.body) return res.status(400).json({ error: 'Request Body is required' });
+
+        if (typeof req.body.token !== "string") return res.status(200).json({ error: "Missing or Invalid token" });
+
+        if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+        const result = await service.logout(req.user.id, req.body.token);
+
+        if (result.error) return res.status(result.status).json({ error: result.error });
+
+        return res.status(result.status).end();
+    }
 }
 
 const authRouter = Router();
@@ -68,5 +82,6 @@ authRouter.post('/register', controller.register);
 authRouter.post('/login', controller.login);
 authRouter.get('/whoami', verifyAccessToken ,controller.whoami);
 authRouter.post('/refresh', verifyRefreshToken, controller.refresh);
+authRouter.post('/logout', verifyAccessToken, controller.logout);
 
 export default authRouter;
