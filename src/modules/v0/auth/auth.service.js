@@ -10,21 +10,26 @@ export class AuthService {
      * @returns {Promise<User>}
      */
     async register(data) {
-        const existingUser = await User.findOne({name: data.name});
-        if (existingUser) {
-            return { error: 'User already exists', status: 409 };
+        try {
+                const existingUser = await User.findOne({name: data.name});
+            if (existingUser) {
+                return { error: 'User already exists', status: 409 };
+            }
+
+            const hashedPassword = await bcrypt.hash(data.password, 10);
+
+            const userData = {
+                name: data.name,
+                password: hashedPassword,
+            };
+
+            const user = await User.create(userData);
+            const pubUser = { id: user._id, name: user.name };
+            return { status: 201, user: pubUser };
+        } catch (err) {
+            console.error("Error on register: " + err);
+            return { status: 500, error: "Internal Server Error" };
         }
-
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-
-        const userData = {
-            name: data.name,
-            password: hashedPassword,
-        };
-
-        const user = await User.create(userData);
-        const pubUser = { id: user._id, name: user.name };
-        return { status: 201, user: pubUser };
     }
 
     /**
@@ -69,8 +74,8 @@ export class AuthService {
 
     /**
      * Refreshes access token using refresh token
-     * @param {String} name 
-     * @param {String} token 
+     * @param {String} id - The ID of the user to refresh token for. 
+     * @param {String} token - The refresh token to validate and use for generating a new access token.
      * @returns {Promise<{error: string, status: number} | {status: number, accessToken: string}>}
      */
     async refresh(id, token) {
@@ -79,7 +84,7 @@ export class AuthService {
         const tUser = await User.findById(refreshToken.userId);
         if (!tUser) return { error: "User Token not exists", status: 400 };
         if (tUser._id.toString() !== id) return { error: "Forbbiden", status: 403 };
-        if (refreshToken.state !== "active") return { error: "Expired Token", status: 400 };
+        if (refreshToken.state !== "active") return { error: "Expired Token", status: 401 };
 
         const user = await User.findById(id);
         if (!user) return { error: "Invalid name", status: 401 };
@@ -87,5 +92,21 @@ export class AuthService {
         const accessToken = jwt.sign({ id: user._id, name: user.name }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
         return { status: 200, accessToken};
+    }
+
+    /**
+     * Logs out a user by invalidating their refresh token
+     * @param {String} id - The ID of the user to log out.
+     * @param {String} token - The refresh token to invalidate.
+     * @returns {Promise<{error: string, status: number} | {status: number}>}
+     */
+    async logout(id, token) {
+        const refreshToken = await RefreshToken.findOne({ token });
+        if (!refreshToken || refreshToken.userId.toString() !== id) return { error: "Forbbiden", status: 403 };
+
+        refreshToken.state = 'revoked';
+        await refreshToken.save();
+
+        return { status: 204 };
     }
 }

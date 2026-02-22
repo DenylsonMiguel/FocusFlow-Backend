@@ -77,6 +77,13 @@ npm start
 | POST   | /api/v0/auth/login    | Login user           |
 | GET    | /api/v0/auth/whoami   | Get current user     |
 | POST   | /api/v0/auth/refresh  | Refresh access token |
+| POST   | /api/v0/auth/logout   | Logout user          |
+
+### User Management
+
+| Method | Endpoint       | Description         |
+| ------ | -------------- | ------------------- |
+| PUT    | /api/v0/users/ | Update user details |
 
 ---
 
@@ -160,6 +167,41 @@ Response:
 ```
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Logout User
+
+Request:
+
+```
+POST /api/v0/auth/logout
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+### Update User Details
+
+Request:
+
+```
+PUT /api/v0/users/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+{
+  "name": "John Doe Updated"
+}
+```
+
+Response:
+
+```
+{
+  "id": "abc123",
+  "name": "John Doe Updated"
 }
 ```
 
