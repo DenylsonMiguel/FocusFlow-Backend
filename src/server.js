@@ -2,8 +2,8 @@ import express from 'express';
 const app = express();
 import cors from 'cors';
 import helmet from 'helmet';
-import registerRoutes from './modules/v0/routes.js';
 import morgan from 'morgan';
+import registerRoutesV0 from './modules/v0/routes.js';
 
 app.use(express.json());
 app.use(cors({
@@ -12,6 +12,6 @@ app.use(cors({
 app.use(helmet());
 app.use(morgan('combined'));
 
-registerRoutes(app);
+registerRoutesV0(app);
 
 export default app;

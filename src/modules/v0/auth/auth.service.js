@@ -10,21 +10,26 @@ export class AuthService {
      * @returns {Promise<User>}
      */
     async register(data) {
-        const existingUser = await User.findOne({name: data.name});
-        if (existingUser) {
-            return { error: 'User already exists', status: 409 };
+        try {
+                const existingUser = await User.findOne({name: data.name});
+            if (existingUser) {
+                return { error: 'User already exists', status: 409 };
+            }
+
+            const hashedPassword = await bcrypt.hash(data.password, 10);
+
+            const userData = {
+                name: data.name,
+                password: hashedPassword,
+            };
+
+            const user = await User.create(userData);
+            const pubUser = { id: user._id, name: user.name };
+            return { status: 201, user: pubUser };
+        } catch (err) {
+            console.error("Error on register: " + err);
+            return { status: 500, error: "Internal Server Error" };
         }
-
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-
-        const userData = {
-            name: data.name,
-            password: hashedPassword,
-        };
-
-        const user = await User.create(userData);
-        const pubUser = { id: user._id, name: user.name };
-        return { status: 201, user: pubUser };
     }
 
     /**
